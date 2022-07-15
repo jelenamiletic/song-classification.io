@@ -1,22 +1,21 @@
+import warnings
+
 import numpy as np
-from matplotlib import pyplot as plt
+import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 from sklearn.model_selection import train_test_split, GridSearchCV
-import pandas as pd
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
-from sklearn.metrics import f1_score, classification_report, confusion_matrix, accuracy_score
-import warnings
+
 warnings.filterwarnings('always')
-warnings.filterwarnings(
-        "ignore", category=DeprecationWarning)
-warnings.filterwarnings(
-        "ignore", category=ConvergenceWarning)
+warnings.filterwarnings('ignore', category=DeprecationWarning)
+warnings.filterwarnings('ignore', category=ConvergenceWarning)
 
 
 def genre_splitter(genre):
@@ -61,10 +60,11 @@ def load_data(path: str):
 def svm(X_train, y_train):
     std_scaler = StandardScaler()
     X_scaled_train = std_scaler.fit_transform(X_train)
-    svm_clf = OneVsRestClassifier(LinearSVC(C=0.01, loss="hinge", random_state=1))
+    svm_clf = OneVsRestClassifier(LinearSVC(C=0.01, loss='hinge', random_state=1))
     svm_clf.fit(X_scaled_train, y_train)
     preds = svm_clf.predict(X_scaled_train)
     print(classification_report(y_train, preds))
+
 
 def logistic_regression(X_train, y_train):
     ovr_clf = OneVsRestClassifier(LogisticRegression(max_iter=1000, random_state=1))
@@ -73,12 +73,12 @@ def logistic_regression(X_train, y_train):
     confusion_matrix(y_test, y_test_pred)
     print(accuracy_score(y_test, y_test_pred))
 
+
 def random_forest_classifier(X_train, y_train):
     rnd_clf = RandomForestClassifier(n_estimators=25, max_leaf_nodes=16, n_jobs=-1, random_state=1)
     rnd_clf.fit(X_train, y_train)
     ypred = rnd_clf.predict(X_test)
     print(accuracy_score(y_test, ypred))
-
 
 
 def grid_search(X_train, y_train):
@@ -90,18 +90,19 @@ def grid_search(X_train, y_train):
     linearSVC.fit(X_train, y_train)
     print(linearSVC.best_params_)  # najbolji za C je: {'SVC__C': 0.01}
 
+
 if __name__ == '__main__':
     X_train, X_test, y_train, y_test = load_data('data/Spotify-2000.csv')
     # svm(X_train, y_train)
-    #logistic_regression(X_train,y_train)
-    #random_forest_classifier(X_train,y_train)
+    # logistic_regression(X_train,y_train)
+    # random_forest_classifier(X_train,y_train)
     pca = PCA(0.95)
     X_train = pca.fit_transform(X_train)
     X_test = pca.transform(X_test)
 
-    log_clf = OneVsRestClassifier(LogisticRegression(max_iter=1000, penalty="l2", C=1, random_state=1))
+    log_clf = OneVsRestClassifier(LogisticRegression(max_iter=1000, penalty='l2', C=1, random_state=1))
     rnd_clf = RandomForestClassifier(random_state=1)
-    svm_clf = OneVsRestClassifier(LinearSVC(C=0.01, loss="hinge", random_state=1))
+    svm_clf = OneVsRestClassifier(LinearSVC(C=0.01, loss='hinge', random_state=1))
     voting_clf = VotingClassifier(estimators=[('lr', log_clf), ('rf', rnd_clf), ('svc', svm_clf)], voting='hard')
     voting_clf.fit(X_train, y_train)
 
@@ -109,4 +110,3 @@ if __name__ == '__main__':
         clf.fit(X_train, y_train)
         ypred = clf.predict(X_test)
         print(clf.__class__.__name__, accuracy_score(y_test, ypred))
-
