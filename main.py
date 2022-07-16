@@ -63,14 +63,13 @@ def svm(X_train, y_train):
     svm_clf = OneVsRestClassifier(LinearSVC(C=0.01, loss='hinge', random_state=1))
     svm_clf.fit(X_scaled_train, y_train)
     preds = svm_clf.predict(X_scaled_train)
-    print(classification_report(y_train, preds))
 
 
 def logistic_regression(X_train, y_train):
     ovr_clf = OneVsRestClassifier(LogisticRegression(max_iter=1000, random_state=1))
     ovr_clf.fit(X_train, y_train)
     y_test_pred = ovr_clf.predict(X_test)
-    confusion_matrix(y_test, y_test_pred)
+    # confusion_matrix(y_test, y_test_pred)
     print(accuracy_score(y_test, y_test_pred))
 
 
@@ -99,14 +98,16 @@ if __name__ == '__main__':
     pca = PCA(0.95)
     X_train = pca.fit_transform(X_train)
     X_test = pca.transform(X_test)
-
-    log_clf = OneVsRestClassifier(LogisticRegression(max_iter=1000, penalty='l2', C=1, random_state=1))
     rnd_clf = RandomForestClassifier(random_state=1)
-    svm_clf = OneVsRestClassifier(LinearSVC(C=0.01, loss='hinge', random_state=1))
+    log_clf = OneVsRestClassifier(LogisticRegression(max_iter=1000, penalty="l2", C=1, random_state=1))
+    svm_clf = OneVsRestClassifier(LinearSVC(C=0.01, loss="hinge", random_state=1))
     voting_clf = VotingClassifier(estimators=[('lr', log_clf), ('rf', rnd_clf), ('svc', svm_clf)], voting='hard')
     voting_clf.fit(X_train, y_train)
 
-    for clf in (log_clf, rnd_clf, svm_clf, voting_clf):
-        clf.fit(X_train, y_train)
-        ypred = clf.predict(X_test)
-        print(clf.__class__.__name__, accuracy_score(y_test, ypred))
+    # for clf in (log_clf, rnd_clf, svm_clf, voting_clf):
+    #     clf.fit(X_train, y_train)
+    #     ypred = clf.predict(X_test)
+    #     print(clf.__class__.__name__, accuracy_score(y_test, ypred))
+    y_pred = voting_clf.predict(X_test)
+    print(accuracy_score(y_test, y_pred))
+
